@@ -1,0 +1,34 @@
+{
+  "name": "@pidchashyi/next-cookies",
+  "version": "1.0.1",
+  "description": "A utility to get cookies from Next.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "next",
+    "cookies",
+    "typescript",
+    "utility"
+  ],
+  "author": "Marian Pidchashyi",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "next-14": "npm:next@14.2.15",
+    "next-15": "npm:next@15.3.0"
+  }
+}

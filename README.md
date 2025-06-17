@@ -152,7 +152,7 @@ console.log(result.message);
 
 ## 👤 Author
 
-Created by [Your Name](https://github.com/Marian1309/next-cookies).
+Created by [Pidchashyi](https://github.com/Marian1309/next-cookies).
 
 ---
 

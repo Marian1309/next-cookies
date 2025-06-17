@@ -2,7 +2,7 @@
 
 > 🍪 Type-safe, configurable cookie management client for Next.js server components — strongly typed cookie names and values with full support for setting, getting, and deleting cookies.
 
-Simplify cookie handling with compile-time validation of cookie names and their allowed values. Designed to work seamlessly with Next.js 13-14 app router’s `cookies()` API.
+Simplify cookie handling with compile-time validation of cookie names and their allowed values. Designed to work seamlessly with Next.js 14 app router’s `cookies()` API.
 
 ---
 
@@ -74,6 +74,7 @@ bun install @pidchashyi/next-cookies
   - `set(name, value, options?)`: set a cookie with type-safe value.
   - `get(name)`: retrieve cookie value.
   - `delete(names)`: delete one or more cookies by name.
+  - `getMultiple(names)`: retrieve the array of values
 
 ---
 
@@ -94,6 +95,12 @@ const cookieManager = new CookieClient({
 ### Setting a cookie
 
 ```ts
+// v14
+cookieManager.set("userRole", "admin", { path: "/", maxAge: 3600 });
+cookieManager.set("theme", "dark");
+cookieManager.set("sessionId", "abc123xyz"); // any string allowed here
+
+// v14
 await cookieManager.set("userRole", "admin", { path: "/", maxAge: 3600 });
 await cookieManager.set("theme", "dark");
 await cookieManager.set("sessionId", "abc123xyz"); // any string allowed here
@@ -106,6 +113,15 @@ const userRole = cookieManager.get("userRole");
 if (userRole.success && userRole.value) {
   console.log("Current user role:", userRole.value);
 }
+
+const [userRole, theme] = cookieManager.getMultiple(["userRole", "theme"]);
+if (userRole.success && userRole.value) {
+  console.log("Current user role:", userRole.value);
+}
+
+if (theme.success && theme.value) {
+  console.log("Current theme:", theme.value);
+}
 ```
 
 ### Deleting cookies
@@ -113,6 +129,8 @@ if (userRole.success && userRole.value) {
 ```ts
 const result = cookieManager.delete(["userRole", "theme"]);
 console.log(result.message);
+
+// `Deleted 2 of 2 cookies`
 ```
 
 ---

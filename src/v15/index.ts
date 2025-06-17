@@ -58,6 +58,22 @@ class CookieClient<Config extends CookieConfig> {
     };
   }
 
+  async getMultiple<N extends keyof Config>(
+    names: N[]
+  ): Promise<{
+    [K in N]: string | null;
+  }> {
+    const cookieStore = await this.getCookieStore();
+    const result = {} as { [K in N]: string | null };
+
+    names.forEach((name) => {
+      const cookie = cookieStore.get(name as string);
+      result[name] = cookie?.value ?? null;
+    });
+
+    return result;
+  }
+
   async delete<N extends keyof Config | string>(
     names: N[]
   ): Promise<{ success: boolean; message: string; deletedCookies: string[] }> {

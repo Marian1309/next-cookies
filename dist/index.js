@@ -29,6 +29,15 @@ class CookieClient {
             value: cookie?.value ?? null,
         };
     }
+    getMultiple(names) {
+        const cookieStore = this.getCookieStore();
+        const result = {};
+        names.forEach((name) => {
+            const cookie = cookieStore.get(name);
+            result[name] = cookie?.value ?? null;
+        });
+        return result;
+    }
     delete(names) {
         const cookieStore = this.getCookieStore();
         const deletedCookies = names.filter((name) => {

@@ -1,6 +1,6 @@
 {
   "name": "@pidchashyi/next-cookies",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A utility to get cookies from Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

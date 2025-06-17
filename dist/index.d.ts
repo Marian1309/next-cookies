@@ -17,6 +17,9 @@ declare class CookieClient<Config extends CookieConfig> {
         message: string;
         value: string | null;
     };
+    getMultiple<N extends keyof Config>(names: N[]): {
+        [K in N]: string | null;
+    };
     delete<N extends keyof Config | string>(names: N[]): {
         success: boolean;
         message: string;

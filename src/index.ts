@@ -1,5 +1,3 @@
-"use server";
-
 import { cookies } from "next-14/headers";
 import type { ResponseCookie } from "next-14/dist/compiled/@edge-runtime/cookies";
 

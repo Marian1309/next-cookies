@@ -100,7 +100,7 @@ cookieManager.set("userRole", "admin", { path: "/", maxAge: 3600 });
 cookieManager.set("theme", "dark");
 cookieManager.set("sessionId", "abc123xyz"); // any string allowed here
 
-// v14
+// v15
 await cookieManager.set("userRole", "admin", { path: "/", maxAge: 3600 });
 await cookieManager.set("theme", "dark");
 await cookieManager.set("sessionId", "abc123xyz"); // any string allowed here

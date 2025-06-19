@@ -1,9 +1,23 @@
 {
   "name": "@pidchashyi/next-cookies",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "A utility to get cookies from Next.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "keywords": [
+    "next",
+    "cookies",
+    "typescript",
+    "utility"
+  ],
+  "homepage": "https://github.com/Marian1309/next-cookies#readme",
+  "bugs": {
+    "url": "https://github.com/Marian1309/next-cookies/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marian1309/next-cookies.git"
+  },
+  "license": "MIT",
+  "author": "Marian Pidchashyi",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -16,24 +30,24 @@
       "types": "./dist/v15/index.d.ts"
     }
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
-  },
-  "keywords": [
-    "next",
-    "cookies",
-    "typescript",
-    "utility"
-  ],
-  "author": "Marian Pidchashyi",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^24.0.3",
-    "typescript": "^5.0.0"
+    "prepare": "bun run build",
+    "postpublish": "rimraf -rf dist"
   },
   "dependencies": {
     "next-14": "npm:next@14.2.15",
     "next-15": "npm:next@15.3.0"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "typescript": "^5.0.0"
   }
 }

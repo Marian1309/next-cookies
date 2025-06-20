@@ -1,6 +1,6 @@
 {
   "name": "@pidchashyi/next-cookies",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A utility to get cookies from Next.js",
   "keywords": [
     "next",
@@ -43,6 +43,7 @@
   },
   "files": [
     "src",
+    "dist",
     "LICENSE",
     "README.md"
   ],

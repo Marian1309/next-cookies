@@ -1,8 +1,14 @@
 # `@pidchashyi/next-cookies`
 
-> 🍪 Type-safe, configurable cookie management for Next.js server components — strongly typed cookie names and values with full support for setting, getting, and deleting cookies.
+> 🍪 Type-safe, configurable cookie management for Next.js server components — with GDPR compliance, backup/recovery, and expiration management.
 
-Simplify cookie handling with compile-time validation of cookie names and their allowed values. Designed to work seamlessly with Next.js app router's `cookies()` API.
+A comprehensive cookie management solution featuring:
+
+- Type-safe cookie operations
+- GDPR compliance and consent management
+- Automatic cookie backup and recovery
+- Expiration tracking and management
+- Full Next.js app router compatibility
 
 ---
 
@@ -20,171 +26,206 @@ bun install @pidchashyi/next-cookies
 
 ---
 
-## ⚠️ Important Usage Notes
+## 🚀 Features
 
-### Type Safety with `as const`
+### Core Features
 
-For full type safety and autocomplete support, **you must declare each cookie's allowed values using `as const`**. This ensures TypeScript treats the arrays as readonly tuples of literal strings instead of general `string[]`.
+- Type-safe cookie operations
+- Automatic value validation
+- Comprehensive error handling
+- Debug logging in development
 
-If you want to include a cookie name without specifying allowed values (accept any string), set its value to `undefined`.
+### GDPR Compliance
 
-Example:
+- Cookie categorization (Essential, Marketing, etc.)
+- Consent management
+- Automatic policy enforcement
+- Cookie policy generation
 
-```ts
-import { createCookieClient } from "@pidchashyi/next-cookies";
+### Backup & Recovery
 
-const cookieClient = createCookieClient({
-  userRole: ["user", "admin", "superadmin"] as const, // ✅ readonly tuple with literal types
-  theme: ["light", "dark"] as const, // ✅ readonly tuple with literal types
-  sessionId: undefined, // ✅ no restrictions on value
-});
-```
+- Automatic backup of critical cookies
+- Corruption detection
+- Multiple backup versions
+- Easy recovery process
 
-If you omit `as const`, you lose literal type inference, breaking autocomplete and type safety:
+### Expiration Management
 
-```ts
-// ❌ Not type-safe, values inferred as string[]
-const cookieClient = createCookieClient({
-  userRole: ["user", "admin", "superadmin"], // Avoid this!
-});
-```
+- Automatic cleanup of expired cookies
+- Expiration monitoring
+- Extension of cookie lifetimes
+- Early expiration warnings
 
 ---
 
-## 🔧 Basic Usage
+## 🔧 Usage Examples
 
-### Setup with Cookie Config
+### Basic Setup with All Features
 
-```ts
-import { createCookieClient } from "@pidchashyi/next-cookies";
+```typescript
+const cookieClient = createCookieClient(
+  {
+    // Basic cookie configuration
+    theme: ["light", "dark"] as const,
+    sessionId: undefined,
 
-const cookieClient = createCookieClient({
-  userRole: ["user", "admin", "superadmin"] as const,
-  theme: ["light", "dark"] as const,
-  sessionId: undefined, // no restrictions on this cookie value
+    // GDPR configuration
+    gdpr: {
+      theme: {
+        category: CookieCategory.Preferences,
+        description: "Stores user's theme preference",
+        duration: "1 year",
+        provider: "First party",
+      },
+      sessionId: {
+        category: CookieCategory.Essential,
+        description: "Maintains user session",
+        duration: "Session",
+        provider: "First party",
+      },
+    },
+
+    // Backup configuration
+    backup: {
+      sessionId: {
+        critical: true,
+        backupCount: 5,
+        validateChecksum: true,
+      },
+    },
+  },
+  {
+    // Optional global settings
+    autoCleanupInterval: 60 * 60 * 1000, // 1 hour
+    expiringSoonThreshold: 24 * 60 * 60 * 1000, // 24 hours
+    gdpr: {
+      defaultConsent: {
+        functional: true,
+        preferences: true,
+      },
+    },
+    backup: {
+      prefix: "__bak_",
+      defaultBackupCount: 3,
+    },
+  }
+);
+```
+
+### GDPR Compliance
+
+```typescript
+// Get current consent status
+const consent = await cookieClient.getConsent();
+
+// Update consent preferences
+await cookieClient.updateConsent({
+  analytics: true,
+  marketing: false,
 });
+
+// Get cookie policy information
+const policy = cookieClient.getCookiePolicy();
+console.log(policy[CookieCategory.Marketing].cookies);
 ```
 
-### Setting a Cookie
+### Cookie Backup & Recovery
 
-```ts
-// Next.js 14 and 15
-await cookieClient.set("userRole", "admin", { path: "/", maxAge: 3600 });
-await cookieClient.set("theme", "dark");
-await cookieClient.set("sessionId", "abc123xyz"); // any string allowed here
-```
+```typescript
+// Backups are created automatically for critical cookies
+await cookieClient.set("sessionId", "abc123");
 
-### Getting a Cookie
-
-```ts
-// Single cookie
-const userRole = await cookieClient.get("userRole");
-if (userRole.success && userRole.value) {
-  console.log("Current user role:", userRole.value);
+// Recover a corrupted cookie
+const recovery = await cookieClient.recoverCookie("sessionId");
+if (recovery.success) {
+  console.log("Recovered value:", recovery.value);
 }
-
-// Multiple cookies
-const multiCookies = await cookieClient.getMultiple(["userRole", "theme"]);
-console.log("User role:", multiCookies.userRole);
-console.log("Theme:", multiCookies.theme);
 ```
 
-### Deleting Cookies
+### Expiration Management
 
-```ts
-const result = await cookieClient.delete(["userRole", "theme"]);
-console.log(result.message); // "Deleted 2 of 2 cookies"
+```typescript
+// Get soon-to-expire cookies
+const expiringSoon = await cookieClient.getExpiringSoonCookies();
+
+// Extend cookie expiration
+await cookieClient.extendExpiration("sessionId", { maxAge: 3600 });
+
+// Clean up expired cookies
+await cookieClient.cleanupExpiredCookies();
 ```
 
 ---
 
-## 🧰 API Reference
+## 📚 API Reference
 
-### `createCookieClient<T>(config: T)`
+### Cookie Client Configuration
 
-Factory function to create a type-safe cookie client instance.
+#### GDPR Options
 
-#### Parameters
+```typescript
+type CookieCategory =
+  | "essential"
+  | "functional"
+  | "analytics"
+  | "marketing"
+  | "preferences";
 
-- `config`: An object mapping cookie names to:
-  - Readonly tuple of literal strings (using `as const`)
-  - `undefined` for unrestricted string values
-
-#### Returns
-
-A cookie client with type-safe methods for managing cookies.
-
-#### Example
-
-```ts
-const client = createCookieClient({
-  theme: ["light", "dark"] as const,
-  sessionId: undefined, // any string value allowed
-});
-
-// Type-safe operations:
-await client.set("theme", "light"); // ✅ Valid
-await client.set("theme", "blue"); // ❌ Type error
-await client.set("unknown", "value"); // ❌ Type error
+interface GDPRConfig {
+  category: CookieCategory;
+  description: string;
+  duration?: string;
+  provider?: string;
+}
 ```
 
-#### Methods
+#### Backup Options
 
-##### `async set(name, value, options?)`
+```typescript
+interface BackupConfig {
+  critical?: boolean;
+  backupCount?: number;
+  validateChecksum?: boolean;
+}
+```
 
-Sets a cookie with type-safe name and value.
+### Methods
 
-##### `async get(name)`
+#### GDPR Management
 
-Retrieves a cookie value.
+- `getConsent()`: Get current consent preferences
+- `updateConsent(preferences)`: Update consent settings
+- `getCookiePolicy()`: Get structured cookie policy information
 
-##### `async getMultiple(names)`
+#### Backup & Recovery
 
-Retrieves multiple cookie values.
+- `recoverCookie(name)`: Recover a cookie from backup
+- `backupCookie(name)`: Manually trigger a backup
 
-##### `async delete(names)`
+#### Expiration Management
 
-Deletes specified cookies.
-
-##### `async has(name)`
-
-Checks if a cookie exists.
-
-##### `async clearAll()`
-
-Deletes all cookies in the configuration.
+- `getExpiredCookies()`: Get all expired cookies
+- `getExpiringSoonCookies(threshold?)`: Get cookies nearing expiration
+- `extendExpiration(name, extension)`: Extend cookie lifetime
+- `cleanupExpiredCookies()`: Remove expired cookies
 
 ---
 
-## 🔒 Type Safety Features
+## 🔒 Security Features
 
-- Strict typing for cookie names and values
-- Compile-time validation of cookie values
-- TypeScript generics for type inference
-- Utility types for enhanced type safety
-- No `any` types used in the codebase
+- Checksum validation for backups
+- Automatic consent enforcement
+- Critical cookie protection
+- Corruption detection
 
 ---
 
 ## 🛠️ Development Features
 
-- Debug logging in development mode
-- Comprehensive error messages
-- Configuration validation
-- Type-safe error handling
-- Performance optimized for production
-
----
-
-## 🧪 Error Handling
-
-The package includes comprehensive error handling:
-
-- Configuration validation
-- Type checking
-- Operation result status
+- Comprehensive debug logging
+- Type-safe operations
 - Detailed error messages
-- Debug logging in development
+- Performance optimization
 
 ---
 

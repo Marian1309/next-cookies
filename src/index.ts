@@ -5,8 +5,8 @@
  * @license MIT
  */
 
-import { cookies } from "next-14/headers";
-import type { ResponseCookie } from "next-14/dist/compiled/@edge-runtime/cookies";
+import { cookies } from "next/headers";
+import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
 // ==============================
 // Type Definitions
@@ -81,7 +81,7 @@ class CookieClient<Config extends CookieConfig> {
       );
     }
 
-    const cookieStore = this.getCookieStore();
+    const cookieStore = await this.getCookieStore();
 
     cookieStore.set({
       name: name as string,
@@ -101,14 +101,14 @@ class CookieClient<Config extends CookieConfig> {
    * @param name - The name of the cookie to retrieve
    * @returns The cookie value and operation status
    */
-  get<N extends keyof Config>(
+  async get<N extends keyof Config>(
     name: N
-  ): { success: boolean; message: string; value: string | null } {
+  ): Promise<{ success: boolean; message: string; value: string | null }> {
     if (process.env.NODE_ENV !== "production") {
       console.debug(`[CookieClient] Getting cookie ${String(name)}`);
     }
 
-    const cookieStore = this.getCookieStore();
+    const cookieStore = await this.getCookieStore();
     const cookie = cookieStore.get(name as string);
 
     if (process.env.NODE_ENV !== "production") {
@@ -131,16 +131,16 @@ class CookieClient<Config extends CookieConfig> {
    * @param names - Array of cookie names to retrieve
    * @returns Object mapping cookie names to their values
    */
-  getMultiple<N extends keyof Config>(
+  async getMultiple<N extends keyof Config>(
     names: N[]
-  ): {
+  ): Promise<{
     [K in N]: string | null;
-  } {
+  }> {
     if (process.env.NODE_ENV !== "production") {
       console.debug(`[CookieClient] Getting multiple cookies:`, names);
     }
 
-    const cookieStore = this.getCookieStore();
+    const cookieStore = await this.getCookieStore();
     const result = {} as { [K in N]: string | null };
 
     names.forEach((name) => {
@@ -161,14 +161,14 @@ class CookieClient<Config extends CookieConfig> {
    * @param names - Array of cookie names to delete
    * @returns Operation result with list of successfully deleted cookies
    */
-  delete<N extends keyof Config | string>(
+  async delete<N extends keyof Config | string>(
     names: N[]
-  ): { success: boolean; message: string; deletedCookies: string[] } {
+  ): Promise<{ success: boolean; message: string; deletedCookies: string[] }> {
     if (process.env.NODE_ENV !== "production") {
       console.debug(`[CookieClient] Attempting to delete cookies:`, names);
     }
 
-    const cookieStore = this.getCookieStore();
+    const cookieStore = await this.getCookieStore();
 
     const deletedCookies = names.filter((name) => {
       try {
@@ -204,14 +204,14 @@ class CookieClient<Config extends CookieConfig> {
    * @param name - The name of the cookie to check
    * @returns Boolean indicating if the cookie exists
    */
-  has<N extends keyof Config>(name: N): boolean {
+  async has<N extends keyof Config>(name: N): Promise<boolean> {
     if (process.env.NODE_ENV !== "production") {
       console.debug(
         `[CookieClient] Checking existence of cookie: ${String(name)}`
       );
     }
 
-    const cookieStore = this.getCookieStore();
+    const cookieStore = await this.getCookieStore();
     const cookie = cookieStore.get(name as string);
     const exists = cookie !== undefined;
 
@@ -226,7 +226,11 @@ class CookieClient<Config extends CookieConfig> {
    * Deletes all cookies defined in the configuration
    * @returns Operation result with list of successfully deleted cookies
    */
-  clearAll(): { success: boolean; message: string; deletedCookies: string[] } {
+  async clearAll(): Promise<{
+    success: boolean;
+    message: string;
+    deletedCookies: string[];
+  }> {
     if (process.env.NODE_ENV !== "production") {
       console.debug("[CookieClient] Clearing all cookies defined in config");
     }
@@ -241,22 +245,40 @@ class CookieClient<Config extends CookieConfig> {
 // ==============================
 
 /**
- * Creates a type-safe cookie client instance with the provided configuration
- * @template T - The cookie configuration type
- * @param config - Configuration object defining valid cookie names and their possible values
- * @returns A new CookieClient instance with type-safe methods
+ * Creates a type-safe cookie client for managing cookies in Next.js applications
+ *
+ * @template T - The cookie configuration type defining valid cookie names and values
+ * @param config - A configuration object that specifies allowed cookie names and their possible values
+ * @returns A type-safe cookie client with methods for setting, getting, and managing cookies
+ *
+ * @description
+ * This function provides a type-safe way to interact with cookies in Next.js applications.
+ * It ensures that only predefined cookie names and values can be used, preventing runtime errors.
+ *
  * @example
  * ```typescript
- * const client = createCookieClient({
+ * // Create a cookie client with a strict configuration
+ * const cookieClient = createCookieClient({
+ *   // Define allowed values for 'theme' cookie
  *   theme: ['light', 'dark'] as const,
- *   sessionId: undefined, // any string value allowed
+ *
+ *   // Allow any string value for 'sessionId'
+ *   sessionId: undefined,
  * });
  *
- * // Type-safe operations:
- * await client.set('theme', 'light'); // ✅ Valid
- * await client.set('theme', 'blue'); // ❌ Type error
- * await client.set('unknown', 'value'); // ❌ Type error
+ * // Type-safe operations
+ * await cookieClient.set('theme', 'light');     // ✅ Valid: 'light' is an allowed theme value
+ * await cookieClient.set('theme', 'blue');      // ❌ Type error: 'blue' is not an allowed theme
+ * await cookieClient.set('unknown', 'value');   // ❌ Type error: 'unknown' is not a defined cookie
+ *
+ * // Retrieve a cookie value
+ * const themeResult = await cookieClient.get('theme');
+ *
+ * // Delete cookies
+ * await cookieClient.delete(['theme', 'sessionId']);
  * ```
+ *
+ * @throws {Error} Throws an error during development if the configuration is invalid
  */
 export function createCookieClient<T extends CookieConfig>(
   config: T
@@ -281,5 +303,3 @@ export function createCookieClient<T extends CookieConfig>(
 }
 
 export default createCookieClient;
-// Add named export as well for better DX
-export { CookieClient };

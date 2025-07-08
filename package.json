@@ -1,7 +1,7 @@
 {
   "name": "@pidchashyi/next-cookies",
-  "version": "2.0.2",
-  "description": "A utility to get cookies from Next.js",
+  "version": "2.1.0",
+  "description": "A utility to get type-safe cookies from Next.js",
   "keywords": [
     "next",
     "cookies",
@@ -23,11 +23,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./v15": {
-      "import": "./dist/v15/index.js",
-      "require": "./dist/v15/index.js",
-      "types": "./dist/v15/index.d.ts"
     }
   },
   "main": "dist/index.js",
@@ -38,8 +33,7 @@
     "postpublish": "rimraf -rf dist"
   },
   "dependencies": {
-    "next-14": "npm:next@14.2.15",
-    "next-15": "npm:next@15.3.0"
+    "next": "15.3.5"
   },
   "files": [
     "src",
